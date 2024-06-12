@@ -1,3 +1,4 @@
+import { TradesRecords } from "../../../shared/types";
 import { FileParserBase } from "./parser-base";
 
 export type CsvSection = {
@@ -25,25 +26,7 @@ export enum TradesColumnsNames {
 
 }
 
-export type TradesRecords = {
 
-    title:string
-    originalHeaders:string[]
-    assetCategoryColumn:string[]
-    currencyColumn:string[]
-    dateTimeColumn:string[]
-    quantityColumn:number[]
-    transactionPriceColumn:number[]
-    closingPriceColumn:number[]
-    proceedsColumn:number[]
-    commissionColumn:number[]
-    basisColumn:number[]
-    realizedPLColumn:number[]
-    mtmPLColumn:number[]
-    codeColumn:string[]
-
-
-}
 
 export class IbReportResolver{
 
@@ -146,10 +129,15 @@ export class IbReportResolver{
         result.assetCategoryColumn = this.getSectionsDataColumn(section,TradesColumnsNames.AssetCategory)
         result.basisColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Basis).map(v=>parseFloat(v))
         result.closingPriceColumn = this.getSectionsDataColumn(section,TradesColumnsNames.CurrentOrClosingPrice).map(v=>parseFloat(v))
+        result.transactionPriceColumn = this.getSectionsDataColumn(section,TradesColumnsNames.TransactionPrice).map(v=>parseFloat(v))
         result.codeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Code)
         result.commissionColumn = this.getSectionsDataColumn(section,TradesColumnsNames.CommisionOrFee).map(v=>parseFloat(v))
         result.currencyColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Currency)
-        result.dateTimeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.DateTime).map(v=>v)
+        result.dateTimeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.DateTime).map(v=>new Date(v).getTime())
+        result.quantityColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Quantity).map(v=>parseFloat(v))
+        result.mtmPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.MarkToMarketPL).map(v=>parseFloat(v))
+        result.proceedsColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Proceeds).map(v=>parseFloat(v))
+        result.realizedPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.RealizedPL).map(v=>parseFloat(v))
         return result
     }
 
@@ -159,6 +147,8 @@ export class IbReportResolver{
 }
 
 export class IbReportParser extends FileParserBase{
+
+    optionsTrades:TradesRecords = {} as TradesRecords
 
     constructor(){
         super()
@@ -174,7 +164,6 @@ export class IbReportParser extends FileParserBase{
             quotedSplit.forEach((section) => {
                 if(section.includes("@@")){
                     lArr.push(section.replace(/@@/g,""))
-                    console.log("includes ##",section)
                 }else{
                     lArr.push(...section.split(","))
                 }
@@ -208,6 +197,8 @@ export class IbReportParser extends FileParserBase{
 
         const resolver = new IbReportResolver(toObjs);
 
+        this.optionsTrades = resolver.optionsTradesRecords
+
         console.log("Account:",resolver.optionsTradesRecords);
     }
 
@@ -237,14 +228,11 @@ export class IbReportParser extends FileParserBase{
             };
             const header = range[0];
             rangeObj.title = header[0];
-            // const startIndex = header.findIndex(h=>h=="Header");
-            // const columnNames = header.slice(startIndex+1);
             rangeObj.header=header;
             
             range.forEach((line,index)=>{
                
                 if(index>0){
-                    // rangeObj.data.push(line.slice(startIndex+1))
                     rangeObj.data.push(line)
                 }
             })

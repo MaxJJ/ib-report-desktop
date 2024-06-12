@@ -1,4 +1,4 @@
-import { IpcMainInvokeEvent, ipcMain} from "electron";
+import { BrowserWindow, IpcMainInvokeEvent, ipcMain, webContents} from "electron";
 
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
@@ -19,16 +19,22 @@ export class MainAPI extends AppConfig{
 
     private init(){
         
-    ipcMain.handle(AppChannels.parseFile,this.handleParseFile);
+   
+    ipcMain.on(AppChannels.sendStartFileParsing,this.handleParseFile)
+    
+  
 
     }
 
     // result.replace(/\s/g, "")
 
-    private handleParseFile = async (event:IpcMainInvokeEvent,args:ParseFileRequestArgs):Promise<ParseFileResponse> => {
-        const result:ParseFileResponse = [];
-
-        this.ibParser.parseIbCsv(args);
-        return result
+    private handleParseFile = async (event:IpcMainInvokeEvent,args:ParseFileRequestArgs) => {
+        
+        await this.ibParser.parseIbCsv(args);
+        const tradesRecords = this.ibParser.optionsTrades;
+        console.log("handleParseFile!",BrowserWindow.getFocusedWindow())
+        BrowserWindow.getFocusedWindow().webContents.send(AppChannels.parsingResult,tradesRecords)
+        
+       
     }
 }

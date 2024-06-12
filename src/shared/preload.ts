@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcMain, ipcRenderer } from "electron";
-import { AppChannels, IBridge, ParseFileRequestArgs } from "./types";
+import { AppChannels, IBridge, ParseFileRequestArgs, ParsingResultListener, SendParseFileArgs, TradesRecords } from "./types";
 
 export {};
 
@@ -13,9 +13,15 @@ const Bridge:IBridge = {
     invoke: function (channel: string, ...args: any[]): Promise<any> {
         throw new Error("Function not implemented.");
     },
-    parseFile: function (args: ParseFileRequestArgs): Promise<[]> {
-        const channel = AppChannels.parseFile;
-        return ipcRenderer.invoke(channel,args);
+    sendStartFileParsing: function (args: SendParseFileArgs): void {
+        ipcRenderer.send(AppChannels.sendStartFileParsing,args);
+    },
+    listenFileParsingResult: function (listener: ParsingResultListener): void {
+        ipcRenderer.on(AppChannels.parsingResult,(event,args:TradesRecords)=>{
+            listener(args);
+        });
+
+        
     }
 }
 
