@@ -11,15 +11,10 @@ export const InputFileParse:FC<any> = () => {
    
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
-      console.log('FILES!:',files)
+      
       if (files) {
         setSelectedFile(files[0]); // Handle only the first selected file
-        // const result = await window.bridge.parseFile(files.item(0).path)
-
-        window.bridge.sendStartFileParsing(files.item(0).path)
-        
-        
-        // console.log(result)
+         window.bridge.sendStartFileParsing(files.item(0).path)
       }
     };
   

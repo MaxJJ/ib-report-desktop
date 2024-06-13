@@ -22,6 +22,7 @@ export type TradesRecords = {
     subtitle:string
     originalHeaders:string[]
     assetCategoryColumn:string[]
+    symbolColumn:string[]
     currencyColumn:string[]
     dateTimeColumn:number[]
     quantityColumn:number[]

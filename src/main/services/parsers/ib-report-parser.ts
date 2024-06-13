@@ -61,7 +61,7 @@ export class IbReportResolver{
         if(filterData){
            sectionCopy.data = section.data.filter(row=>{
             const headerIndex = section.header.indexOf('Header')
-            return  row[headerIndex] == 'Data'
+            return  row[headerIndex].includes('Data')
            }) 
         }
         
@@ -97,8 +97,14 @@ export class IbReportResolver{
     }
 
     private getSectionColumnIndex(section:CsvSection,columnName:string):number{
-
-        return section.header.indexOf(columnName)
+        let ix = -1;
+        section.header.forEach((h,i,a)=>{
+            if(h.includes(columnName)){
+                ix=i
+            }
+        })
+        // return section.header.indexOf(columnName)
+        return ix
     }
 
     private getOptionsTradesSection(){
@@ -109,7 +115,7 @@ export class IbReportResolver{
         const opionsTradesSectionFiltered = tradesSections.filter(section => {
             const columnIndex = this.getSectionColumnIndex(section,TradesColumnsNames.AssetCategory)
             if(columnIndex >= 0){
-                return section.data[1][columnIndex] == assetCategory
+                return section.data[1][columnIndex].includes(assetCategory)
             }else{
                 return false
             }
@@ -138,6 +144,7 @@ export class IbReportResolver{
         result.mtmPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.MarkToMarketPL).map(v=>parseFloat(v))
         result.proceedsColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Proceeds).map(v=>parseFloat(v))
         result.realizedPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.RealizedPL).map(v=>parseFloat(v))
+        result.symbolColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Symbol)
         return result
     }
 
