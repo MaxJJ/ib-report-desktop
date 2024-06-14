@@ -44,6 +44,20 @@ export const OptionTradesTable:FC<any> = () => {
     const proceedsCellRenderer = (rowIndex: number) => (
         <Cell>{data && data.proceedsColumn[rowIndex]}</Cell>
     );
+    const commissionsCellRenderer = (rowIndex: number) => (
+        <Cell>{data && data.commissionColumn[rowIndex]}</Cell>
+    );
+    const netProceedsCellRenderer = (rowIndex: number) => {
+        if(data){
+            const proceeds = data.proceedsColumn[rowIndex]
+            const fees = data.commissionColumn[rowIndex]
+            const net = proceeds - fees
+            return (<Cell>{net}</Cell>)
+        }else{
+            return (<Cell></Cell>)
+        }
+
+};
  
     return (
         
@@ -69,6 +83,8 @@ export const OptionTradesTable:FC<any> = () => {
             <Column name="Currency" cellRenderer={currencyCellRenderer}/>
             <Column name="T. Price" cellRenderer={transactionPriceCellRenderer}/>
             <Column name="Proceeds" cellRenderer={proceedsCellRenderer}/>
+            <Column name="Commissions" cellRenderer={commissionsCellRenderer}/>
+            <Column name="Net Proceeds" cellRenderer={netProceedsCellRenderer}/>
             <Column name="C. Price" cellRenderer={currentOrClosingPriceCellRenderer}/>
             <Column name="Realized PL" cellRenderer={realizedPLCellRenderer}/>
            
