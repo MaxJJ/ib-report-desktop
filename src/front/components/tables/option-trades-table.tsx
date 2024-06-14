@@ -11,6 +11,17 @@ export const OptionTradesTable:FC<any> = () => {
         console.log(data)
     },[data])
 
+    const fromToDates = () => {
+        if(data){
+            const dates = data.dateTimeColumn
+            const min = Math.min(...dates)
+            const minDate = new Date(min).toDateString()
+            const max = Math.max(...dates)
+            const maxDate = new Date(max).toDateString()
+
+            return (<div>{`${minDate} -> ${maxDate}`}</div>)
+        }
+    }
     const symbolCellRenderer = (rowIndex: number) => (
         <Cell>{data && data.symbolColumn[rowIndex]}</Cell>
     );
@@ -60,40 +71,46 @@ export const OptionTradesTable:FC<any> = () => {
 };
  
     return (
+
+       <div style={{display: 'flex',flexDirection: 'column',minHeight: '100%'}}>
+            <div>
+            {fromToDates()}
+            </div>
+            <div style={{position: 'relative',flex:'1 0'}}>
+                <Table2 numRows={data && data.assetCategoryColumn.length ? data.assetCategoryColumn.length : 25 } 
+                    className="table-wrap"
+                    //    columnWidths={[90,70,200,200,100,100,100,150,null,null]}
+                    // defaultColumnWidth={90}
+
+                    minRowHeight={12}
+                    maxRowHeight={18}
+                    renderMode={RenderMode.BATCH_ON_UPDATE}
+                    enableGhostCells={true} enableFocusedCell={true}
+                    //  selectionModes={SelectionModes.ROWS_ONLY}
+                    //    onSelection={onRowSelection}
+                    //    bodyContextMenuRenderer = {tableContextRenderer}
+                    loadingOptions={data && data.assetCategoryColumn.length ? [] : [TableLoadingOption.CELLS,TableLoadingOption.ROW_HEADERS]} 
+                    >
+                        <Column name="Date & Time" cellRenderer={dateTimeCellRenderer}/>
+                        <Column name="Symbol" cellRenderer={symbolCellRenderer}/>
+                        <Column name="Quantity" cellRenderer={quantityCellRenderer}/>
+                        <Column name="Currency" cellRenderer={currencyCellRenderer}/>
+                        <Column name="T. Price" cellRenderer={transactionPriceCellRenderer}/>
+                        <Column name="Proceeds" cellRenderer={proceedsCellRenderer}/>
+                        <Column name="Commissions" cellRenderer={commissionsCellRenderer}/>
+                        <Column name="Net Proceeds" cellRenderer={netProceedsCellRenderer}/>
+                        <Column name="C. Price" cellRenderer={currentOrClosingPriceCellRenderer}/>
+                        <Column name="Realized PL" cellRenderer={realizedPLCellRenderer}/>
+                    
+                        <Column name="Trade type" cellRenderer={codeCellRenderer}/>
+                        
+
+                    
+                    </Table2>
         
-        <div style={{width:'100vw',height:'100vh'}}>
-
-<Table2 numRows={data && data.assetCategoryColumn.length ? data.assetCategoryColumn.length : 25 } 
-        //    className='cdt-table'
-        //    columnWidths={[90,70,200,200,100,100,100,150,null,null]}
-        // defaultColumnWidth={90}
-
-           minRowHeight={12}
-           maxRowHeight={18}
-           renderMode={RenderMode.BATCH_ON_UPDATE}
-           enableGhostCells={true} enableFocusedCell={true}
-          //  selectionModes={SelectionModes.ROWS_ONLY}
-        //    onSelection={onRowSelection}
-        //    bodyContextMenuRenderer = {tableContextRenderer}
-           loadingOptions={data && data.assetCategoryColumn.length ? [] : [TableLoadingOption.CELLS,TableLoadingOption.ROW_HEADERS]} 
-           >
-            <Column name="Date & Time" cellRenderer={dateTimeCellRenderer}/>
-            <Column name="Symbol" cellRenderer={symbolCellRenderer}/>
-            <Column name="Quantity" cellRenderer={quantityCellRenderer}/>
-            <Column name="Currency" cellRenderer={currencyCellRenderer}/>
-            <Column name="T. Price" cellRenderer={transactionPriceCellRenderer}/>
-            <Column name="Proceeds" cellRenderer={proceedsCellRenderer}/>
-            <Column name="Commissions" cellRenderer={commissionsCellRenderer}/>
-            <Column name="Net Proceeds" cellRenderer={netProceedsCellRenderer}/>
-            <Column name="C. Price" cellRenderer={currentOrClosingPriceCellRenderer}/>
-            <Column name="Realized PL" cellRenderer={realizedPLCellRenderer}/>
-           
-            <Column name="Trade type" cellRenderer={codeCellRenderer}/>
-            
-
-         
-        </Table2>
+            </div>
         </div>
+
 
     )
 }

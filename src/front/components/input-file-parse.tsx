@@ -23,7 +23,7 @@ export const InputFileParse:FC<any> = () => {
     };
   
     return (
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', maxWidth:'28rem' }}>
         <FileInput
         //   inputProps={{'accept':'image/*'}}
           inputProps={{accept:'.csv'}}
