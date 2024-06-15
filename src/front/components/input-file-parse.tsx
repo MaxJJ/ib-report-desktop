@@ -18,9 +18,6 @@ export const InputFileParse:FC<any> = () => {
       }
     };
   
-    const handleRemoveFile = () => {
-      setSelectedFile(null);
-    };
   
     return (
       <div style={{ display: 'flex', maxWidth:'28rem' }}>
@@ -28,16 +25,12 @@ export const InputFileParse:FC<any> = () => {
         //   inputProps={{'accept':'image/*'}}
           inputProps={{accept:'.csv'}}
           text={selectedFile?.name}
-          buttonText="Upload Image"
+          buttonText="Upload"
           hasSelection={true}
           onInputChange={handleInputChange}
           fill={true}
           />
-        {selectedFile && (
-          <Button onClick={handleRemoveFile} intent="danger" style={{ marginTop: 10 }}>
-            Select
-          </Button>
-        )}
+
       </div>
     );
   };

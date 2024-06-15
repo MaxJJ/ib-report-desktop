@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ParsingResultListener, TradesRecords } from "../../shared/types";
+import { IbReportParsingResult, ParsingResultListener, TradesRecords } from "../../shared/types";
 
 export const useParsingResult = () => {
-    const [ tradesRecords, setTradesRecords ] = useState<TradesRecords>();
+    const [ tradesRecords, setTradesRecords ] = useState<IbReportParsingResult>();
 
     const listener:ParsingResultListener = (data) => {
         setTradesRecords(data);
-        console.log(data);
+      
     }
 
     useEffect( () => {

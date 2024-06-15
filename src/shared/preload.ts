@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcMain, ipcRenderer } from "electron";
-import { AppChannels, IBridge, ParseFileRequestArgs, ParsingResultListener, SendParseFileArgs, TradesRecords } from "./types";
+import { AppChannels, IBridge, IbReportParsingResult, ParseFileRequestArgs, ParsingResultListener, SendParseFileArgs, TradesRecords } from "./types";
 
 export {};
 
@@ -17,7 +17,7 @@ const Bridge:IBridge = {
         ipcRenderer.send(AppChannels.sendStartFileParsing,args);
     },
     listenFileParsingResult: function (listener: ParsingResultListener): void {
-        ipcRenderer.on(AppChannels.parsingResult,(event,args:TradesRecords)=>{
+        ipcRenderer.on(AppChannels.parsingResult,(event,args:IbReportParsingResult)=>{
             listener(args);
         });
 

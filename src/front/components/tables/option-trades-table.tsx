@@ -1,67 +1,58 @@
 import { FC, useEffect } from "react"
 import { useParsingResult } from "../../hooks/useParsingResult";
-import { TradesRecords } from "../../../shared/types";
+import { IbReportParsingResult, TradesRecords } from "../../../shared/types";
 import { Cell, Column,RenderMode,Table2, TableLoadingOption } from "@blueprintjs/table";
 
-export const OptionTradesTable:FC<any> = () => {
+interface OptionTradesTableProps{data:TradesRecords}
 
-    const data:TradesRecords = useParsingResult()
+export const OptionTradesTable:FC<OptionTradesTableProps> = (props:OptionTradesTableProps) => {
+
+ 
 
     useEffect(() => {
-        console.log(data)
-    },[data])
+        console.log(props.data)
+    },[props.data])
 
-    const fromToDates = () => {
-        if(data){
-            const dates = data.dateTimeColumn
-            const min = Math.min(...dates)
-            const minDate = new Date(min).toDateString()
-            const max = Math.max(...dates)
-            const maxDate = new Date(max).toDateString()
-
-            return (<div>{`${minDate} -> ${maxDate}`}</div>)
-        }
-    }
     const symbolCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.symbolColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.symbolColumn[rowIndex]}</Cell>
     );
     const quantityCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.quantityColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.quantityColumn[rowIndex]}</Cell>
     );
     const codeCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.codeColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.codeColumn[rowIndex]}</Cell>
     );
 
     const dateTimeCellRenderer = (rowIndex: number) => (
-        <Cell>{data && 
+        <Cell>{props.data && 
             
-            new Date(data.dateTimeColumn[rowIndex]).toLocaleString()}</Cell>
+            new Date(props.data.dateTimeColumn[rowIndex]).toLocaleString()}</Cell>
     );
 
     const transactionPriceCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.transactionPriceColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.transactionPriceColumn[rowIndex]}</Cell>
     );
 
     const currentOrClosingPriceCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.closingPriceColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.closingPriceColumn[rowIndex]}</Cell>
     );
 
     const currencyCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.currencyColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.currencyColumn[rowIndex]}</Cell>
     );
     const realizedPLCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.realizedPLColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.realizedPLColumn[rowIndex]}</Cell>
     );
     const proceedsCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.proceedsColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.proceedsColumn[rowIndex]}</Cell>
     );
     const commissionsCellRenderer = (rowIndex: number) => (
-        <Cell>{data && data.commissionColumn[rowIndex]}</Cell>
+        <Cell>{props.data && props.data.commissionColumn[rowIndex]}</Cell>
     );
     const netProceedsCellRenderer = (rowIndex: number) => {
-        if(data){
-            const proceeds = data.proceedsColumn[rowIndex]
-            const fees = data.commissionColumn[rowIndex]
+        if(props.data){
+            const proceeds = props.data.proceedsColumn[rowIndex]
+            const fees = props.data.commissionColumn[rowIndex]
             const net = proceeds - fees
             return (<Cell>{net}</Cell>)
         }else{
@@ -72,12 +63,9 @@ export const OptionTradesTable:FC<any> = () => {
  
     return (
 
-       <div style={{display: 'flex',flexDirection: 'column',minHeight: '100%'}}>
-            <div>
-            {fromToDates()}
-            </div>
-            <div style={{position: 'relative',flex:'1 0'}}>
-                <Table2 numRows={data && data.assetCategoryColumn.length ? data.assetCategoryColumn.length : 25 } 
+ 
+           
+                <Table2 numRows={props.data && props.data.assetCategoryColumn.length ? props.data.assetCategoryColumn.length : 25 } 
                     className="table-wrap"
                     //    columnWidths={[90,70,200,200,100,100,100,150,null,null]}
                     // defaultColumnWidth={90}
@@ -89,7 +77,7 @@ export const OptionTradesTable:FC<any> = () => {
                     //  selectionModes={SelectionModes.ROWS_ONLY}
                     //    onSelection={onRowSelection}
                     //    bodyContextMenuRenderer = {tableContextRenderer}
-                    loadingOptions={data && data.assetCategoryColumn.length ? [] : [TableLoadingOption.CELLS,TableLoadingOption.ROW_HEADERS]} 
+                    loadingOptions={props.data && props.data.assetCategoryColumn.length ? [] : [TableLoadingOption.CELLS,TableLoadingOption.ROW_HEADERS]} 
                     >
                         <Column name="Date & Time" cellRenderer={dateTimeCellRenderer}/>
                         <Column name="Symbol" cellRenderer={symbolCellRenderer}/>
@@ -108,8 +96,8 @@ export const OptionTradesTable:FC<any> = () => {
                     
                     </Table2>
         
-            </div>
-        </div>
+       
+     
 
 
     )

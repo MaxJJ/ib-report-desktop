@@ -32,8 +32,7 @@ export class MainAPI extends AppConfig{
         
         await this.ibParser.parseIbCsv(args);
         const tradesRecords = this.ibParser.optionsTrades;
-        console.log("handleParseFile!",BrowserWindow.getFocusedWindow())
-        BrowserWindow.getFocusedWindow().webContents.send(AppChannels.parsingResult,tradesRecords)
+        BrowserWindow.getFocusedWindow().webContents.send(AppChannels.parsingResult,this.ibParser.parsingResult)
         
        
     }

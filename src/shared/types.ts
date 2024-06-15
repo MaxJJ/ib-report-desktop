@@ -38,10 +38,24 @@ export type TradesRecords = {
 
 }
 
+export type IbReportParsingResult = {
+    account:string
+    name:string
+    baseCurrency:string
+    stocksTrades:TradesRecords
+    stockTradesFrom:number
+    stocksTradesTo:number
+    stocksTradesSymbols:string[]
+    optionsTrades:TradesRecords
+    optionsTradesFrom:number
+    optionsTradesTo:number
+    optionsTradesSymbols:string[]
+}
+
 export type ParseFileRequestArgs = string;
 
 export type ParseFileResponse = TradesRecords;
 
 export type SendParseFileArgs = string;
 
-export type ParsingResultListener = (data:TradesRecords) => void
+export type ParsingResultListener = (data:IbReportParsingResult) => void

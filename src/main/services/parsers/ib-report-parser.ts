@@ -1,4 +1,4 @@
-import { TradesRecords } from "../../../shared/types";
+import { IbReportParsingResult, TradesRecords } from "../../../shared/types";
 import { FileParserBase } from "./parser-base";
 
 export type CsvSection = {
@@ -35,6 +35,7 @@ export class IbReportResolver{
     private ACCOUNT_INFO_TITLE = "Account Information"
     private ACCOUNT_FIELD = "Account"
     private BASE_CURRENCY_FIELD = "Base Currency"
+    private NAME_FIELD = "Name"
 
     private NET_ASSET_VALUE_TITLE = "Net Asset Value"
     private CHANGE_IN_NAV = "Change in NAV"
@@ -49,6 +50,13 @@ export class IbReportResolver{
     private CODES = "Codes"
 
     private Data:CsvSection[] = []
+
+    stockTradesSymbols:string[] = []
+    stockTradesFrom = 0
+    stockTradesTo = 0
+    optionsTradesSymbols:string[] = []
+    optionsTradesFrom = 0
+    optionsTradesTo = 0
 
     constructor(data:CsvSection[]){
 
@@ -78,12 +86,17 @@ export class IbReportResolver{
 
     get account(){
         const data = this.Data.filter(item => item.title == this.ACCOUNT_INFO_TITLE)[0]
+        console.log("account data: ",data)
+        console.log("Data: ",this.Data)
 
         const rows = data.data
 
-        const accountRow = rows.filter(r=>r[0] == this.ACCOUNT_FIELD)[0]
+        const fieldNameIndex = this.getSectionColumnIndex(data,'Field Name')
+        const fieldValueIndex = this.getSectionColumnIndex(data,'Field Value')
 
-        return accountRow[1]
+        const accountRow = rows.filter(r=>r[fieldNameIndex] == this.ACCOUNT_FIELD)[0]
+
+        return accountRow[fieldValueIndex]
     }
 
     get baseCurrency(){
@@ -91,9 +104,25 @@ export class IbReportResolver{
 
         const rows = data.data
 
-        const baseCurrencyRow = rows.filter(r=>r[0] == this.BASE_CURRENCY_FIELD)[0]
+        const fieldNameIndex = this.getSectionColumnIndex(data,'Field Name')
+        const fieldValueIndex = this.getSectionColumnIndex(data,'Field Value')
 
-        return baseCurrencyRow[1]
+        const baseCurrencyRow = rows.filter(r=>r[fieldNameIndex] == this.BASE_CURRENCY_FIELD)[0]
+
+        return baseCurrencyRow[fieldValueIndex]
+    }
+
+    get name(){
+        const data = this.Data.filter(item => item.title == this.ACCOUNT_INFO_TITLE)[0]
+
+        const rows = data.data
+        const fieldNameIndex = this.getSectionColumnIndex(data,'Field Name')
+        const fieldValueIndex = this.getSectionColumnIndex(data,'Field Value')
+        
+
+        const nameRow = rows.filter(r=>r[fieldNameIndex] == this.NAME_FIELD)[0]
+
+        return nameRow[fieldValueIndex]
     }
 
     private getSectionColumnIndex(section:CsvSection,columnName:string):number{
@@ -131,6 +160,7 @@ export class IbReportResolver{
         const result:TradesRecords = {} as TradesRecords
 
         result.title = "Trades"
+        result.subtitle = "Options"
         result.originalHeaders = this.TradesSection.header
         result.assetCategoryColumn = this.getSectionsDataColumn(section,TradesColumnsNames.AssetCategory)
         result.basisColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Basis).map(v=>parseFloat(v))
@@ -145,6 +175,66 @@ export class IbReportResolver{
         result.proceedsColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Proceeds).map(v=>parseFloat(v))
         result.realizedPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.RealizedPL).map(v=>parseFloat(v))
         result.symbolColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Symbol)
+
+        const tradesFrom = Math.min(...result.dateTimeColumn)
+        const tradesTo = Math.max(...result.dateTimeColumn)
+        const symbols = Array.from(new Set(result.symbolColumn))
+
+        this.optionsTradesFrom = tradesFrom
+        this.optionsTradesTo = tradesTo
+        this.optionsTradesSymbols = symbols
+        return result
+    }
+    private getStocksTradesSection(){
+
+        const tradesSections = this.Data.filter(section => section.title == this.TRADES)
+        const assetCategory = "Stocks"
+
+        const opionsTradesSectionFiltered = tradesSections.filter(section => {
+            const columnIndex = this.getSectionColumnIndex(section,TradesColumnsNames.AssetCategory)
+            if(columnIndex >= 0){
+                return section.data[1][columnIndex].includes(assetCategory)
+            }else{
+                return false
+            }
+            
+        })
+
+        return opionsTradesSectionFiltered.length ? opionsTradesSectionFiltered[0] : {} as CsvSection
+    }
+
+    get stocksTradesRecords():TradesRecords{
+        
+        const section:CsvSection = this.getStocksTradesSection()
+        const result:TradesRecords = {} as TradesRecords
+
+        result.title = "Trades"
+        result.subtitle = "Stocks"
+        result.originalHeaders = this.TradesSection.header
+        result.assetCategoryColumn = this.getSectionsDataColumn(section,TradesColumnsNames.AssetCategory)
+        result.basisColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Basis).map(v=>parseFloat(v))
+        result.closingPriceColumn = this.getSectionsDataColumn(section,TradesColumnsNames.CurrentOrClosingPrice).map(v=>parseFloat(v))
+        result.transactionPriceColumn = this.getSectionsDataColumn(section,TradesColumnsNames.TransactionPrice).map(v=>parseFloat(v))
+        result.codeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Code)
+        result.commissionColumn = this.getSectionsDataColumn(section,TradesColumnsNames.CommisionOrFee).map(v=>parseFloat(v))
+        result.currencyColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Currency)
+        result.dateTimeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.DateTime).map(v=>new Date(v).getTime())
+        result.quantityColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Quantity).map(v=>parseFloat(v))
+        result.mtmPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.MarkToMarketPL).map(v=>parseFloat(v))
+        result.proceedsColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Proceeds).map(v=>parseFloat(v))
+        result.realizedPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.RealizedPL).map(v=>parseFloat(v))
+        result.symbolColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Symbol)
+
+        const tradesFrom = Math.min(...result.dateTimeColumn)
+        const tradesTo = Math.max(...result.dateTimeColumn)
+        const symbols = Array.from(new Set(result.symbolColumn))
+
+        this.stockTradesFrom = tradesFrom
+        this.stockTradesTo = tradesTo
+        this.stockTradesSymbols = symbols
+
+        
+
         return result
     }
 
@@ -156,6 +246,9 @@ export class IbReportResolver{
 export class IbReportParser extends FileParserBase{
 
     optionsTrades:TradesRecords = {} as TradesRecords
+    stocksTrades:TradesRecords = {} as TradesRecords
+
+    parsingResult:IbReportParsingResult = {} as IbReportParsingResult
 
     constructor(){
         super()
@@ -197,14 +290,28 @@ export class IbReportParser extends FileParserBase{
             }
         })
 
-
+        console.log('Indexes! : ',headersIndexes)
         const ranges = this.splitByHeaders(linesArr,headersIndexes);
 
         const toObjs = this.toObjects(ranges);
 
         const resolver = new IbReportResolver(toObjs);
 
-        this.optionsTrades = resolver.optionsTradesRecords
+       
+        this.parsingResult.account = resolver.account
+        this.parsingResult.name = resolver.name
+        this.parsingResult.baseCurrency = resolver.baseCurrency
+
+        this.parsingResult.stocksTrades = resolver.stocksTradesRecords
+        this.parsingResult.stockTradesFrom = resolver.stockTradesFrom
+        this.parsingResult.stocksTradesTo = resolver.stockTradesTo
+        this.parsingResult.stocksTradesSymbols = resolver.stockTradesSymbols
+
+        this.parsingResult.optionsTrades = resolver.optionsTradesRecords
+        this.parsingResult.optionsTradesFrom = resolver.optionsTradesFrom
+        this.parsingResult.optionsTradesTo = resolver.optionsTradesTo
+        this.parsingResult.optionsTradesSymbols = resolver.optionsTradesSymbols
+       
 
         console.log("Account:",resolver.optionsTradesRecords);
     }
@@ -212,9 +319,10 @@ export class IbReportParser extends FileParserBase{
     private splitByHeaders(lines:string[][],indexes:number[]): string[][][]{
         const result:string[][][] = []
         indexes.forEach((index,key,array)=>{
-            if(array.length-2 <= index){
+            // if((array.length-2) <= index){
+            // result.push(lines.slice(index,array[key+1]))
+            // }
             result.push(lines.slice(index,array[key+1]))
-            }
         })
 
 
