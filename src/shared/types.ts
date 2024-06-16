@@ -1,3 +1,5 @@
+import { Trade } from "../main/storage/models/trades";
+
 export interface IBridge{
 
     send:(channel:string, ...args: any[])=>void;
@@ -5,6 +7,9 @@ export interface IBridge{
 
     sendStartFileParsing:(args:SendParseFileArgs)=>void;
     listenFileParsingResult:(listener:ParsingResultListener)=>void
+
+    sendStartOptionTradesSave:(args:StartTradesSavingArgs)=>void;
+    listenTradesSavingProgress:(listener:TradesSavingProgressListener)=>void
     
 
 
@@ -13,7 +18,9 @@ export interface IBridge{
 
 export enum AppChannels{
     sendStartFileParsing="sendStartFileParsing",
-    parsingResult="parsingResult"
+    parsingResult="parsingResult",
+    saveOptionTrades = "saveOptionTrades",
+    tradeSavingProgress = "tradeSavingProgress"
 }
 
 export type TradesRecords = {
@@ -59,3 +66,41 @@ export type ParseFileResponse = TradesRecords;
 export type SendParseFileArgs = string;
 
 export type ParsingResultListener = (data:IbReportParsingResult) => void
+
+
+export enum AssetCategories{
+    STOCK="stock",
+    OPTION="option"
+}
+
+export enum TradeCodes{
+    O="Opening Trade",
+    C="Closing Trade",
+    P="Partial Execution",
+    Ep="Resulted from an Expired Position",
+    Ex="Exercise",
+    A="Assignment",
+
+}
+
+export enum MainProcessStatus{
+    SUCCESS="success",
+    FAILURE="failure",
+    IN_PROGRESS="in_progress",
+    COMPLETED = "completed",
+    STARTED = "starting",
+    PENDING = "pending",
+    FINISHED = "finished"
+
+
+}
+
+export type StartTradesSavingArgs = IbReportParsingResult
+export type TradesSavingProgress={
+    status:string,
+    trade:Trade,
+    message:string
+
+}
+
+export type TradesSavingProgressListener = (data:TradesSavingProgress) => void

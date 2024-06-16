@@ -1,11 +1,11 @@
 import { BrowserWindow, IpcMainInvokeEvent, ipcMain, webContents} from "electron";
 
-import { createReadStream } from 'fs';
-import { createInterface } from 'readline';
 
-import { AppChannels, ParseFileRequestArgs, ParseFileResponse } from "../../shared/types";
+import { AppChannels, ParseFileRequestArgs, ParseFileResponse, StartTradesSavingArgs } from "../../shared/types";
 import { AppConfig } from "../app-config";
 import { IbReportParser } from "../services/parsers/ib-report-parser";
+import { TradesQueries } from "../storage/queries/trades-queries";
+
 
 
 export class MainAPI extends AppConfig{
@@ -21,6 +21,7 @@ export class MainAPI extends AppConfig{
         
    
     ipcMain.on(AppChannels.sendStartFileParsing,this.handleParseFile)
+    ipcMain.on(AppChannels.saveOptionTrades,this.handleSaveOptionTrades)
     
   
 
@@ -34,6 +35,12 @@ export class MainAPI extends AppConfig{
         const tradesRecords = this.ibParser.optionsTrades;
         BrowserWindow.getFocusedWindow().webContents.send(AppChannels.parsingResult,this.ibParser.parsingResult)
         
+       
+    }
+    private handleSaveOptionTrades = async (event:IpcMainInvokeEvent,args:StartTradesSavingArgs) => {
+        
+        const q = new TradesQueries(args)
+        await q.saveOptionTrades()
        
     }
 }

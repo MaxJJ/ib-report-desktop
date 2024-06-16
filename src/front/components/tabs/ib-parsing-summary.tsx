@@ -1,12 +1,20 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { IbReportParsingResult } from "../../../shared/types";
-import { Section, SectionCard } from "@blueprintjs/core";
+import { Button, Section, SectionCard } from "@blueprintjs/core";
+import { useTradeSavingProgress } from "../../hooks/useTradeSavingProgress";
 
 interface IbParsingSummaryProps{data:IbReportParsingResult}
 
 export const IbParsingSummary:FC<IbParsingSummaryProps> = (props:IbParsingSummaryProps) => {
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const saveProgress = useTradeSavingProgress()
+
+    useEffect(() => {
+      if (saveProgress) {
+        console.log(saveProgress)
+    }},[saveProgress])
    
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
@@ -16,6 +24,10 @@ export const IbParsingSummary:FC<IbParsingSummaryProps> = (props:IbParsingSummar
          window.bridge.sendStartFileParsing(files.item(0).path)
       }
     };
+
+    const onOptionTradesSave = () => {
+      window.bridge.sendStartOptionTradesSave(props.data);
+    }
   
   
     return (
@@ -41,6 +53,7 @@ export const IbParsingSummary:FC<IbParsingSummaryProps> = (props:IbParsingSummar
         <div>{props.data && new Date(props.data.optionsTradesTo).toLocaleDateString()} </div>
         <div>Number of trades</div>
         <div>{props.data && props.data.optionsTrades.dateTimeColumn.length} </div>
+        <Button text="Save Trades to Database" onClick={onOptionTradesSave}></Button>
     </div>
         
     </SectionCard>
