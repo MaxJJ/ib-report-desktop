@@ -12,6 +12,7 @@ export class Trade extends Realm.Object {
     account!: string;
     fees!:number;
     currency: string;
+    rate: number;
     proceeds:number;
     netProceeds:number;
     assetType: string;
@@ -31,6 +32,7 @@ export class Trade extends Realm.Object {
         price: "float",
         fees:"float",
         currency: "string",
+        rate:"float?",
         proceeds:"float",
         netProceeds:"float?",
         assetType: "string",

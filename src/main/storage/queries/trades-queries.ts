@@ -1,6 +1,7 @@
 import { BrowserWindow } from "electron";
 import { AppChannels, IbReportParsingResult, MainProcessStatus, TradesRecords, TradesSavingProgress } from "../../../shared/types";
 import { Trade, openTradeRealm } from "../models/trades";
+import { runToEuroRateUpdater } from "../../workers/toEuro";
 
 export class TradesQueries{
 
@@ -74,7 +75,11 @@ export class TradesQueries{
                 BrowserWindow.getFocusedWindow().webContents.send(AppChannels.tradeSavingProgress,progress)
 
             }
-            )
+            );
+
+            r.close()
+
+            runToEuroRateUpdater()
         }
     }
 
