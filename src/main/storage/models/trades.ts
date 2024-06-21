@@ -7,6 +7,7 @@ export class Trade extends Realm.Object {
     _id!:BSON.ObjectId;
     symbol!: string;
     quantity!: number;
+    side:string;
     price!: number;
     date!: number;
     account!: string;
@@ -17,6 +18,11 @@ export class Trade extends Realm.Object {
     netProceeds:number;
     assetType: string;
     tradeType: string;
+    netProceedsEur:number;
+    netPriceEur:number;
+    unclosed:number;
+    openPriceEur: number;
+    realizedPLEur:number;
 
    
 
@@ -29,14 +35,20 @@ export class Trade extends Realm.Object {
         date: "int",
         symbol: "string",
         quantity: "int",
-        price: "float",
-        fees:"float",
+        side: "string?",
+        price: "double",
+        fees:"double",
         currency: "string",
-        rate:"float?",
-        proceeds:"float",
-        netProceeds:"float?",
+        rate:"double?",
+        proceeds:"double",
+        netProceeds:"double?",
         assetType: "string",
         tradeType: "string",
+        netProceedsEur:"double?",
+        netPriceEur:"double?",
+        unclosed:"int?",
+        openPriceEur:"double?",
+        realizedPLEur:"double?"
       },
       primaryKey: "_id",
     };

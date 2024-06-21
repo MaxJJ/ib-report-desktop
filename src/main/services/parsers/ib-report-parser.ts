@@ -200,16 +200,18 @@ export class IbReportResolver{
             
         })
 
-        return opionsTradesSectionFiltered.length ? opionsTradesSectionFiltered[0] : {} as CsvSection
+        return opionsTradesSectionFiltered.length ? opionsTradesSectionFiltered[0] : null
     }
 
     get stocksTradesRecords():TradesRecords{
         
         const section:CsvSection = this.getStocksTradesSection()
+        if(section){
         const result:TradesRecords = {} as TradesRecords
 
         result.title = "Trades"
         result.subtitle = "Stocks"
+       
         result.originalHeaders = this.TradesSection.header
         result.assetCategoryColumn = this.getSectionsDataColumn(section,TradesColumnsNames.AssetCategory)
         result.basisColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Basis).map(v=>parseFloat(v))
@@ -236,6 +238,9 @@ export class IbReportResolver{
         
 
         return result
+        }else{
+            return null
+        }
     }
 
     
@@ -301,12 +306,12 @@ export class IbReportParser extends FileParserBase{
         this.parsingResult.account = resolver.account
         this.parsingResult.name = resolver.name
         this.parsingResult.baseCurrency = resolver.baseCurrency
-
+        if(resolver.stocksTradesRecords){
         this.parsingResult.stocksTrades = resolver.stocksTradesRecords
         this.parsingResult.stockTradesFrom = resolver.stockTradesFrom
         this.parsingResult.stocksTradesTo = resolver.stockTradesTo
         this.parsingResult.stocksTradesSymbols = resolver.stockTradesSymbols
-
+        }
         this.parsingResult.optionsTrades = resolver.optionsTradesRecords
         this.parsingResult.optionsTradesFrom = resolver.optionsTradesFrom
         this.parsingResult.optionsTradesTo = resolver.optionsTradesTo

@@ -2,6 +2,7 @@ import { BrowserWindow } from "electron";
 import { AppChannels, IbReportParsingResult, MainProcessStatus, TradesRecords, TradesSavingProgress } from "../../../shared/types";
 import { Trade, openTradeRealm } from "../models/trades";
 import { runToEuroRateUpdater } from "../../workers/toEuro";
+import { runFifoUpdate } from "../../workers/fifoUpdate";
 
 export class TradesQueries{
 
@@ -79,7 +80,8 @@ export class TradesQueries{
 
             r.close()
 
-            runToEuroRateUpdater()
+            await runToEuroRateUpdater()
+            runFifoUpdate()
         }
     }
 
