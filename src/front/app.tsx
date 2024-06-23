@@ -6,6 +6,7 @@ import { OptionTradesTable } from "./components/tables/option-trades-table";
 import { IbReportParsing } from "./components/Ib-report-parsing";
 import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
 import { TopMenu } from "./components/top-menu";
+import { EdsReportBuild } from "./components/eds-report-build";
 
 
 export const AppHome:FC<any> = () => {
@@ -34,6 +35,7 @@ export const AppWrap:FC<any> = () => {
         <Route path="/" element={<AppHome />}>
           <Route index element={<IbReportParsing/>} />
           <Route path="parser" element={<IbReportParsing/>} />
+          <Route path="report" element={<EdsReportBuild/>} />
           {/* <Route path="watchlists" element={<WatchlistPage />} />
           <Route path="watchlists/:watchlistId" element={<WatchlistPage />} /> */}
           <Route path="*" element={<>NOT FOUND</>} />

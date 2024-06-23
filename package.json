@@ -48,6 +48,8 @@
   "license": "MIT",
   "dependencies": {
     "@blueprintjs/core": "^5.10.3",
+    "@blueprintjs/datetime2": "^2.3.5",
+    "@blueprintjs/select": "^5.1.5",
     "@blueprintjs/table": "^5.1.5",
     "electron-squirrel-startup": "^1.0.1",
     "react": "^18.3.1",

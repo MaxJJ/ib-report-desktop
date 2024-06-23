@@ -1,10 +1,11 @@
 import { BrowserWindow, IpcMainInvokeEvent, ipcMain, webContents} from "electron";
 
 
-import { AppChannels, ParseFileRequestArgs, ParseFileResponse, StartTradesSavingArgs } from "../../shared/types";
+import { AppChannels, ParseFileRequestArgs, ParseFileResponse, StartTradesSavingArgs, TradesFilter } from "../../shared/types";
 import { AppConfig } from "../app-config";
 import { IbReportParser } from "../services/parsers/ib-report-parser";
 import { TradesQueries } from "../storage/queries/trades-queries";
+import { GetTradesFifo } from "../storage/queries/get-trades-fifo";
 
 
 
@@ -22,6 +23,10 @@ export class MainAPI extends AppConfig{
    
     ipcMain.on(AppChannels.sendStartFileParsing,this.handleParseFile)
     ipcMain.on(AppChannels.saveOptionTrades,this.handleSaveOptionTrades)
+
+    ipcMain.handle(AppChannels.getTradesFifo,async (event,args:TradesFilter)=>{
+        return await GetTradesFifo(args)
+    })
     
   
 

@@ -22,7 +22,7 @@ export function TopMenu () {
   return (
     <ButtonGroup minimal={true} large={true} >
     <Button icon="database" onClick={()=>navigate('parser')} intent={checkLocation('/parser')}>Parsing</Button>
-    <Button icon="function" onClick={()=>navigate('/')} intent={checkLocation('/')}>Report</Button>
+    <Button icon="function" onClick={()=>navigate('report')} intent={checkLocation('/report')}>Report</Button>
     
 </ButtonGroup>
   );

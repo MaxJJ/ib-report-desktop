@@ -6,21 +6,20 @@ export interface IBridge{
     invoke:(channel:string, ...args: any[])=>Promise<any>;
 
     sendStartFileParsing:(args:SendParseFileArgs)=>void;
-    listenFileParsingResult:(listener:ParsingResultListener)=>void
+    listenFileParsingResult:(listener:ParsingResultListener)=>void;
 
     sendStartOptionTradesSave:(args:StartTradesSavingArgs)=>void;
-    listenTradesSavingProgress:(listener:TradesSavingProgressListener)=>void
-    
+    listenTradesSavingProgress:(listener:TradesSavingProgressListener)=>void;
 
-
-
+    getTradesFifo:(filter: TradesFilter ) => Promise<DbTrade[][]>;
 }
 
 export enum AppChannels{
     sendStartFileParsing="sendStartFileParsing",
     parsingResult="parsingResult",
     saveOptionTrades = "saveOptionTrades",
-    tradeSavingProgress = "tradeSavingProgress"
+    tradeSavingProgress = "tradeSavingProgress",
+    getTradesFifo = "getTradesFifo",
 }
 
 export type TradesRecords = {
@@ -104,3 +103,12 @@ export type TradesSavingProgress={
 }
 
 export type TradesSavingProgressListener = (data:TradesSavingProgress) => void
+
+export type TradesFilter = {
+    account:string
+    symbol?:string
+    dateFrom?:number
+    dateTo?:number
+}
+
+export type DbTrade = object & Trade

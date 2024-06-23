@@ -62,3 +62,40 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+
+.grid-1-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(200px, 1fr);
+  gap: 10px;
+}
+
+.table-nested {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+
+.edsReportLayot {
+  display: grid;
+  grid-template-rows: min-content min-content 1fr;
+  gap: 6px;
+
+  >.filterRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+
+
+}
+
+.bp5-popover-content {
+  >*>.bp5-menu {
+    max-height: 390px;
+    overflow-y: auto;
+  }
+}
