@@ -1,11 +1,14 @@
 import { BrowserWindow, IpcMainInvokeEvent, ipcMain, webContents} from "electron";
 
 
-import { AppChannels, ParseFileRequestArgs, ParseFileResponse, StartTradesSavingArgs, TradesFilter } from "../../shared/types";
+import { AppChannels, DbTrade, EdsReportProps, ParseFileRequestArgs, ParseFileResponse, StartTradesSavingArgs, TradesFilter } from "../../shared/types";
 import { AppConfig } from "../app-config";
 import { IbReportParser } from "../services/parsers/ib-report-parser";
 import { TradesQueries } from "../storage/queries/trades-queries";
 import { GetTradesFifo } from "../storage/queries/get-trades-fifo";
+import { EdsReportBuilder } from "../services/eds-report-builder/eds-report-builder";
+
+import {writeFileSync} from 'fs';
 
 
 
@@ -28,6 +31,11 @@ export class MainAPI extends AppConfig{
         return await GetTradesFifo(args)
     })
     
+    ipcMain.on(AppChannels.runXmlBuild,(event,data:DbTrade[],path:string,props:EdsReportProps)=>{
+        const xml = new EdsReportBuilder(data,props).getXml()
+        console.log(xml)
+        writeFileSync(path,xml,{encoding:'utf8',flag:'w'})
+    })
   
 
     }

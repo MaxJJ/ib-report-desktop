@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcMain, ipcRenderer } from "electron";
-import { AppChannels, DbTrade, IBridge, IbReportParsingResult, ParseFileRequestArgs, ParsingResultListener, SendParseFileArgs, TradesFilter, TradesRecords, TradesSavingProgress, TradesSavingProgressListener } from "./types";
+import { AppChannels, DbTrade, EdsReportProps, IBridge, IbReportParsingResult, ParseFileRequestArgs, ParsingResultListener, SendParseFileArgs, TradesFilter, TradesRecords, TradesSavingProgress, TradesSavingProgressListener } from "./types";
 
 export {};
 
@@ -31,9 +31,12 @@ const Bridge:IBridge = {
             listener(args);
         });
     },
-    getTradesFifo: function (filter:TradesFilter): Promise<DbTrade[][]> {
-       return ipcRenderer.invoke(AppChannels.getTradesFifo,filter)
+    getTradesFifo: function (filter: TradesFilter): Promise<DbTrade[][]> {
+        return ipcRenderer.invoke(AppChannels.getTradesFifo, filter);
     },
+    runXmlBuild: function (data: DbTrade[], path: string,props:EdsReportProps): void {
+        ipcRenderer.send(AppChannels.runXmlBuild, data,path,props);
+    }
 }
 
 

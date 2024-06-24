@@ -12,6 +12,8 @@ export interface IBridge{
     listenTradesSavingProgress:(listener:TradesSavingProgressListener)=>void;
 
     getTradesFifo:(filter: TradesFilter ) => Promise<DbTrade[][]>;
+
+    runXmlBuild:(data:DbTrade[],path:string, props:EdsReportProps)=>void;
 }
 
 export enum AppChannels{
@@ -20,6 +22,7 @@ export enum AppChannels{
     saveOptionTrades = "saveOptionTrades",
     tradeSavingProgress = "tradeSavingProgress",
     getTradesFifo = "getTradesFifo",
+    runXmlBuild = "runXmlBuild"
 }
 
 export type TradesRecords = {
@@ -112,3 +115,13 @@ export type TradesFilter = {
 }
 
 export type DbTrade = object & Trade
+
+export type EdsReportProps = {
+    year:number
+    quarter:number,
+    month:number
+    name:string
+    code:number
+    email:string
+    phone:string
+}
