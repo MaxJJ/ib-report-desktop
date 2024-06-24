@@ -34,9 +34,10 @@ const Bridge:IBridge = {
     getTradesFifo: function (filter: TradesFilter): Promise<DbTrade[][]> {
         return ipcRenderer.invoke(AppChannels.getTradesFifo, filter);
     },
-    runXmlBuild: function (data: DbTrade[], path: string,props:EdsReportProps): void {
-        ipcRenderer.send(AppChannels.runXmlBuild, data,path,props);
-    }
+    runXmlBuild: function (data: DbTrade[], path: string, props: EdsReportProps): void {
+        ipcRenderer.send(AppChannels.runXmlBuild, data, path, props);
+    },
+
 }
 
 

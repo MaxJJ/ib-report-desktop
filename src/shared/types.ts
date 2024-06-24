@@ -14,6 +14,8 @@ export interface IBridge{
     getTradesFifo:(filter: TradesFilter ) => Promise<DbTrade[][]>;
 
     runXmlBuild:(data:DbTrade[],path:string, props:EdsReportProps)=>void;
+
+
 }
 
 export enum AppChannels{

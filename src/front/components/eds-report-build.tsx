@@ -172,14 +172,16 @@ export const EdsReportBuild:FC<any> = () => {
                 
                 itemRenderer={ renderAccountItem} 
                 onItemSelect={ onAccountSelect}>
-                <ButtonGroup fill={true}>
+               
                 <Button alignText="left" fill={true} rightIcon="caret-down" text={filter && filter.account ? filter.account : 'By Account'}></Button>
-                <Button icon="cross" onClick={()=>{setFilter({...filter,account:null})}} />
-                </ButtonGroup>
+                
+                
                 </Select>
-                <ButtonGroup fill={true}>
+                <Button icon="cross"onClick={()=>{setFilter({...filter,account:null})}} />
+
+               
                 <Select<string> 
-                className="select"
+                className="select ml-6"
                 items={getSymbols()} 
                 itemPredicate={filterSymbols}
                 scrollToActiveItem={true}
@@ -192,14 +194,15 @@ export const EdsReportBuild:FC<any> = () => {
 
                 </Select>
                 <Button icon="cross" onClick={()=>{setFilter({...filter,symbol:null})}} />
-                </ButtonGroup>
+                
 
                 
                 <DateInput3 
                 onChange={onFromDate} 
                 canClearSelection={true} 
                 showActionsBar={true} 
-                
+                className="ml-6"
+                placeholder="Date from:"
                 value={filter.dateFrom ? new Date(filter.dateFrom).toLocaleString() : ''}/>
                     
                 
@@ -208,7 +211,8 @@ export const EdsReportBuild:FC<any> = () => {
                 onChange={onToDate} 
                 canClearSelection={true} 
                 showActionsBar={true} 
-                
+                className="ml-6"
+                placeholder="Date to:"
                 value={filter.dateTo ? new Date(filter.dateTo).toLocaleString() : ''}/>
 
               
@@ -236,26 +240,42 @@ export const EdsReportBuild:FC<any> = () => {
                             <Text>Year</Text>
                             <InputGroup 
                             value={reportProps.year.toFixed()}
+                            onValueChange={(v)=>setReportProps({...reportProps,year:parseInt(v)})}
                             ></InputGroup>
 
                             <Text>Quarter</Text>
                             <InputGroup 
                             value={reportProps.quarter.toFixed()}
+                            onValueChange={(v)=>setReportProps({...reportProps,quarter:parseInt(v)})}
                             ></InputGroup>
 
                             <Text>Name</Text>
                             <InputGroup 
                             value={reportProps.name}
+                            onValueChange={(v)=>setReportProps({...reportProps,name:v})}
                             ></InputGroup>
 
                             <Text>Personal Code</Text>
                             <InputGroup 
                             value={reportProps.code.toFixed()}
+                            onValueChange={(v)=>setReportProps({...reportProps,code:parseInt(v)})}
+                            ></InputGroup>
+
+                            <Text>Phone</Text>
+                            <InputGroup 
+                            value={reportProps.phone}
+                            onValueChange={(v)=>setReportProps({...reportProps,phone:v})}
+                            ></InputGroup>
+
+                            <Text>Email</Text>
+                            <InputGroup 
+                            value={reportProps.email}
+                            onValueChange={(v)=>setReportProps({...reportProps,email:v})}
                             ></InputGroup>
                         
                         <FileInput
                            
-                            inputProps={{accept:".xml"}}
+                            inputProps={{accept:".xml,.txt"}}
                             text={file?.name}
                             buttonText="Browse"
                             

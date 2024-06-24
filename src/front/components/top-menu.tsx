@@ -1,5 +1,5 @@
 
-import { AnchorButton, Button, ButtonGroup, Intent } from '@blueprintjs/core';
+import { AnchorButton, Button, ButtonGroup, Divider, Intent } from '@blueprintjs/core';
 import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -20,10 +20,12 @@ export function TopMenu () {
   }
 
   return (
-    <ButtonGroup minimal={true} large={true} >
-    <Button icon="database" onClick={()=>navigate('parser')} intent={checkLocation('/parser')}>Parsing</Button>
-    <Button icon="function" onClick={()=>navigate('report')} intent={checkLocation('/report')}>Report</Button>
-    
-</ButtonGroup>
+    <div className="top-menu mt-6">
+    <ButtonGroup minimal={false} large={true} >
+      <Button icon="database" onClick={()=>navigate('parser')} intent={checkLocation('/parser')}>Parsing</Button>
+      <Button icon="function" onClick={()=>navigate('report')} intent={checkLocation('/report')}>Report</Button>
+    </ButtonGroup>
+<Divider/>
+</div>
   );
 }

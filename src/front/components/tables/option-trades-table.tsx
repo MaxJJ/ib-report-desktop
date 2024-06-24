@@ -1,5 +1,4 @@
 import { FC, useEffect } from "react"
-import { useParsingResult } from "../../hooks/useParsingResult";
 import { IbReportParsingResult, TradesRecords } from "../../../shared/types";
 import { Cell, Column,RenderMode,Table2, TableLoadingOption } from "@blueprintjs/table";
 

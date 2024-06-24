@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { IbReportParsingResult } from "../../../shared/types";
-import { Button, Section, SectionCard } from "@blueprintjs/core";
+import { Button, Section, SectionCard, Text } from "@blueprintjs/core";
 import { useTradeSavingProgress } from "../../hooks/useTradeSavingProgress";
 
 interface IbParsingSummaryProps{data:IbReportParsingResult}
@@ -31,16 +31,24 @@ export const IbParsingSummary:FC<IbParsingSummaryProps> = (props:IbParsingSummar
   
   
     return (
-      <div style={{ display: 'flex', maxWidth:'100%',height:'100%'}}>
+      <div className="grid-2-cols">
 
 
 
         <Section title="Account">
     <SectionCard >
-    <div>{props.data && props.data.account} </div>
+      {props.data && 
+        <>
+        <div>{props.data && props.data.account} </div>
         <div>{props.data && props.data.name} </div>
         <div>{props.data && props.data.baseCurrency} </div>
+        </>
+      }
+      {!props.data && 
+      <Text>Please select csv file to parse</Text>
+      }
     </SectionCard>
+      
  
 </Section>
 
@@ -53,7 +61,7 @@ export const IbParsingSummary:FC<IbParsingSummaryProps> = (props:IbParsingSummar
         <div>{props.data && new Date(props.data.optionsTradesTo).toLocaleDateString()} </div>
         <div>Number of trades</div>
         <div>{props.data && props.data.optionsTrades.dateTimeColumn.length} </div>
-        <Button text="Save Trades to Database" onClick={onOptionTradesSave}></Button>
+        <Button disabled={!props.data} text="Save Trades to Database" onClick={onOptionTradesSave}></Button>
     </div>
         
     </SectionCard>
