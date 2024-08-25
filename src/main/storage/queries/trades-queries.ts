@@ -21,7 +21,7 @@ export class TradesQueries{
             trade.fees = records.commissionColumn[ix];
             trade.proceeds = records.proceedsColumn[ix];
             trade.quantity = records.quantityColumn[ix];
-            trade.netProceeds = trade.proceeds - trade.fees;
+            trade.netProceeds = trade.proceeds + trade.fees;
             trade.price= records.transactionPriceColumn[ix];
             trade.currency = records.currencyColumn[ix];
             trade.assetType = records.assetCategoryColumn[ix];

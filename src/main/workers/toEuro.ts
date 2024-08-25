@@ -11,6 +11,7 @@ export const runToEuroRateUpdater = async ()=>{
     for (const trade of trades) {
         
          trade.rate = trade.currency == "EUR" ? 1 : await getRate({...trade}.currency as string, {...trade}.date as number)
+         
          trade.netProceedsEur = Math.round((trade.netProceeds / trade.rate) * 100) / 100
          trade.netPriceEur = Math.abs(Math.round(trade.netProceedsEur / trade.quantity * 100) / 100)
       

@@ -1,11 +1,10 @@
 import { FC, useEffect, useState } from "react"
 import { useParsingResult } from "../hooks/useParsingResult"
-import { IbReportParsingResult, TradesRecords } from "../../shared/types"
+import { IbReportParsingResult } from "../../shared/types"
 import { InputFileParse } from "./input-file-parse"
-import { Classes, Tab, TabId, Tabs, TabsExpander } from "@blueprintjs/core"
+import { Tab, TabId, Tabs, TabsExpander } from "@blueprintjs/core"
 import { OptionTradesTable } from "./tables/option-trades-table"
 import { IbParsingSummary } from "./tabs/ib-parsing-summary"
-import { ipcRenderer } from "electron"
 
 
 export const IbReportParsing:FC<any> = () => {
@@ -19,8 +18,7 @@ export const IbReportParsing:FC<any> = () => {
         setData(nextdata)
         const listener = ()=>{setData(null)}
         window.addEventListener("clearFileToRender",listener)
-        console.log(data)
-
+        
         return ()=>window.removeEventListener("clearFileToRender",listener)
     },[nextdata])
 

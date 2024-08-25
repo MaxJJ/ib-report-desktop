@@ -48,6 +48,7 @@ export class IbReportResolver{
     private DEPOSITS_AND_WITHDRAWALS = "Deposits & Withdrawals"
     private FINANCIAL_INSTRUMENTS_INFORMATION = "Financial Instrument Information"
     private CODES = "Codes"
+    private O_CASH_SETTLEMENTS = "Option Cash Settlements"
 
     private Data:CsvSection[] = []
 

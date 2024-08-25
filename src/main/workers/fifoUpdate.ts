@@ -7,7 +7,18 @@ let R:Realm;
 let TRADES:Trade[] = []
 
 const setTrades = async () => {
-    TRADES.push(...R.objects("Trade").toJSON() as unknown as Trade[]);
+    const trs = R.objects("Trade").toJSON() as unknown as Trade[]
+    trs.forEach(tr =>{
+        tr.netProceeds = tr.proceeds + tr.fees
+        tr.netProceedsEur = Math.round((tr.netProceeds / tr.rate) * 100) / 100
+        tr.netPriceEur = Math.abs(Math.round(tr.netProceedsEur / tr.quantity * 100) / 100)
+        R.write(()=>{
+            R.create("Trade",tr,UpdateMode.Modified)
+        })
+        TRADES.push(tr)
+    })
+    // TRADES.push(...trs);
+
 }
 
 const getAccounts = ():string[] =>{

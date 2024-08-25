@@ -118,7 +118,7 @@ export const EdsReportBuild:FC<any> = () => {
     }
 
     const getTotalPL = () =>{
-        return data && data.length ? data.reduce((a, b) => a + b.realizedPLEur, 0) : ""
+        return data && data.length ? data.reduce((a, b) => a + b.realizedPLEur, 0).toFixed(2) : ""
 
     }
 
