@@ -1,4 +1,4 @@
-import { IbReportParsingResult, TradesRecords } from "../../../shared/types";
+import { IbReportParsingResult, OptionCashSettlementRecords, TradesRecords } from "../../../shared/types";
 import { FileParserBase } from "./parser-base";
 
 export type CsvSection = {
@@ -48,7 +48,7 @@ export class IbReportResolver{
     private DEPOSITS_AND_WITHDRAWALS = "Deposits & Withdrawals"
     private FINANCIAL_INSTRUMENTS_INFORMATION = "Financial Instrument Information"
     private CODES = "Codes"
-    private O_CASH_SETTLEMENTS = "Option Cash Settlements"
+    private OPTION_CASH_SETTLEMENTS = "Option Cash Settlements"
 
     private Data:CsvSection[] = []
 
@@ -87,8 +87,7 @@ export class IbReportResolver{
 
     get account(){
         const data = this.Data.filter(item => item.title == this.ACCOUNT_INFO_TITLE)[0]
-        console.log("account data: ",data)
-        console.log("Data: ",this.Data)
+
 
         const rows = data.data
 
@@ -153,6 +152,61 @@ export class IbReportResolver{
         })
 
         return opionsTradesSectionFiltered.length ? opionsTradesSectionFiltered[0] : {} as CsvSection
+    }
+
+    private getOptionCashSettlementsSection(){
+        const cashSettlementsSection = this.Data.filter(section => section.title == this.OPTION_CASH_SETTLEMENTS)
+        const section = cashSettlementsSection.length ? cashSettlementsSection[0] : null
+
+        const result = {} as CsvSection;
+
+        if(section){
+            result.title = section.title
+            result.header = section.header
+            const data = section.data
+
+            const dateIndex = this.getSectionColumnIndex(section,"Date")
+            result.data = data.filter((line,i,arr)=>line[dateIndex] != "")
+
+        }
+
+       
+        return section ? result : null
+    }
+
+    get optionCashSettlementRecords():OptionCashSettlementRecords{
+
+        const section = this.getOptionCashSettlementsSection();
+
+        const result = {} as OptionCashSettlementRecords
+
+        if(section){
+
+            result.title = "Option Cash Settlements"
+            result.originalHeaders = section.header
+    
+            result.descriptionColumn = this.getSectionsDataColumn(section,"Description")
+            const symbols = [...result.descriptionColumn].map((descr=>{
+                const regex = new RegExp(/[A-Z]{1,4}\s\d{2}[A-Z]{3}\d{2}\s(\d{1,4}|\d{1,4}.\d{1,4})\sP|C/g);
+                const symbols = descr.match(regex)
+
+                const symb = symbols ? symbols[0] : ""
+                return symb
+            }))
+
+            result.symbolColumn = symbols
+            result.dateTimeColumn = this.getSectionsDataColumn(section,"Date").map(v=>new Date(v).getTime())
+            result.amountColumn = this.getSectionsDataColumn(section,"Amount").map((str=>{
+                return parseFloat(str.replace(",",""))
+            }))
+
+            result.currencyColumn = this.getSectionsDataColumn(section,"Currency")
+
+        }
+
+
+        return result
+        
     }
 
     get optionsTradesRecords():TradesRecords{
@@ -222,7 +276,7 @@ export class IbReportResolver{
         result.commissionColumn = this.getSectionsDataColumn(section,TradesColumnsNames.CommisionOrFee).map(v=>parseFloat(v))
         result.currencyColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Currency)
         result.dateTimeColumn = this.getSectionsDataColumn(section,TradesColumnsNames.DateTime).map(v=>new Date(v).getTime())
-        result.quantityColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Quantity).map(v=>parseFloat(v))
+        result.quantityColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Quantity).map(v=>{v=v.replace(",",""); return parseFloat(v);})
         result.mtmPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.MarkToMarketPL).map(v=>parseFloat(v))
         result.proceedsColumn = this.getSectionsDataColumn(section,TradesColumnsNames.Proceeds).map(v=>parseFloat(v))
         result.realizedPLColumn = this.getSectionsDataColumn(section,TradesColumnsNames.RealizedPL).map(v=>parseFloat(v))
@@ -263,6 +317,7 @@ export class IbReportParser extends FileParserBase{
     public async parseIbCsv(path:string){
         const linesArr:string[][]=[];
         const applyToLine = (line:string) => {
+            line=line.replace(/","/,"@@##@@")
             line=line.replace(/,"/,"##@@")
             line=line.replace(/",/,"@@##")
             const quotedSplit = line.split("##")
@@ -296,7 +351,7 @@ export class IbReportParser extends FileParserBase{
             }
         })
 
-        console.log('Indexes! : ',headersIndexes)
+       
         const ranges = this.splitByHeaders(linesArr,headersIndexes);
 
         const toObjs = this.toObjects(ranges);
@@ -318,8 +373,8 @@ export class IbReportParser extends FileParserBase{
         this.parsingResult.optionsTradesTo = resolver.optionsTradesTo
         this.parsingResult.optionsTradesSymbols = resolver.optionsTradesSymbols
        
-
-        console.log("Account:",resolver.optionsTradesRecords);
+        this.parsingResult.optionsCashSettlement = resolver.optionCashSettlementRecords
+       
     }
 
     private splitByHeaders(lines:string[][],indexes:number[]): string[][][]{

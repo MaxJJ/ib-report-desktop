@@ -49,6 +49,19 @@ export type TradesRecords = {
 
 }
 
+export type OptionCashSettlementRecords = {
+    title:string
+    subtitle:string
+    originalHeaders:string[]
+    currencyColumn:string[]
+    dateTimeColumn:number[]
+    descriptionColumn:string[]
+    symbolColumn:string[]
+    amountColumn:number[]
+
+
+}
+
 export type IbReportParsingResult = {
     account:string
     name:string
@@ -61,6 +74,7 @@ export type IbReportParsingResult = {
     optionsTradesFrom:number
     optionsTradesTo:number
     optionsTradesSymbols:string[]
+    optionsCashSettlement:OptionCashSettlementRecords
 }
 
 export type ParseFileRequestArgs = string;

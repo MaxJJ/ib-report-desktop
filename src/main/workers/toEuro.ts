@@ -1,6 +1,7 @@
 import { Results, UpdateMode } from "realm";
 import { Trade, openTradeRealm } from "../storage/models/trades";
 import {parseString} from 'xml2js';
+import { OptionSettlement } from "../storage/models/settlements";
 
 export const runToEuroRateUpdater = async ()=>{
 
@@ -21,6 +22,24 @@ export const runToEuroRateUpdater = async ()=>{
         for (const trade of trades) {
      
           r.create("Trade", trade,UpdateMode.Modified)
+            
+       }
+    })
+
+
+    const settlements= r.objects('OptionSettlement').filtered("rate == $0",null).toJSON() as unknown as OptionSettlement[];
+    for (const settlement of settlements) {
+        
+        settlement.rate = settlement.currency == "EUR" ? 1 : await getRate({...settlement}.currency as string, {...settlement}.date as number)
+        settlement.amountEur = Math.round((settlement.amount / settlement.rate) * 100) / 100
+
+      
+    }
+
+    r.write(()=>{
+        for (const settlement of settlements) {
+     
+          r.create("OptionSettlement", settlement,UpdateMode.Modified)
             
        }
     })

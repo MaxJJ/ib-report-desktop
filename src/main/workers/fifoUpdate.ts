@@ -1,3 +1,4 @@
+import { OptionSettlement } from "../storage/models/settlements";
 import { Trade, openTradeRealm } from "../storage/models/trades";
 import {Realm, UpdateMode} from "realm";
 
@@ -98,6 +99,28 @@ const getAverageOpenPrice = (trade:Trade) => {
     return formatNumber((tradePrice + OPEN_PRICE)/2,true);
 }
 
+const updatePLwithCashSettlement = async (trade:Trade): Promise<Trade> => {
+    const R = await openTradeRealm();
+
+    const symbolSettlements =  R.objects("OptionSettlement").filtered("account = $0 AND symbol = $1",trade.account,trade.symbol).sorted("date")
+    if(symbolSettlements.length){
+        const filtered = symbolSettlements.filtered("date >= $0 AND date <= $1",trade.fifoOpenDateTime,trade.fifoCloseDateTime)
+
+        if(filtered.length){
+            const ss = filtered.toJSON() as unknown as OptionSettlement[] 
+            
+            const cashSettlement = ss.map(v=>v.amountEur).reduce((sum,curr)=>sum+curr , 0)
+            trade.optionCashSettlementEur = cashSettlement
+            trade.realizedPLEur = trade.realizedPLEur+cashSettlement
+
+        }
+    }
+
+    return trade
+}
+
+const FIFO_DATE = {OPEN:0,CLOSE:0}
+
 const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
     const unclosedQty = previousTrades.map(t=>t.quantity).reduce((sum,q)=>sum+q,0);
     // OPEN_PRICE = unclosedQty == 0 ? trade.netProceedsEur / trade.quantity : OPEN_PRICE;
@@ -109,25 +132,36 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
         case TradeSide.OPEN_BUY:
         case TradeSide.OPEN_SELL:
             OPEN_PRICE = formatNumber(trade.netProceedsEur / trade.quantity, true)
+            FIFO_DATE.OPEN = trade.date
+            trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.realizedPLEur = 0;
             break;
         case TradeSide.PARTIAL_OPEN_BUY:
         case TradeSide.PARTIAL_OPEN_SELL:
             OPEN_PRICE = getAverageOpenPrice(trade)
+            trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.realizedPLEur = 0;
             break;
         case TradeSide.PARTIAL_CLOSE_BUY:
         case TradeSide.CLOSE_BUY:
-
+            trade.fifoOpenDateTime = FIFO_DATE.OPEN
+            trade.fifoCloseDateTime = trade.date
+            FIFO_DATE.OPEN = trade.date
             trade.realizedPLEur = formatNumber(trade.netProceedsEur + trade.quantity*OPEN_PRICE)
             
             break;
         case TradeSide.PARTIAL_CLOSE_SELL:
         case TradeSide.CLOSE_SELL:
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur - trade.quantity*OPEN_PRICE)
+            trade.fifoOpenDateTime = FIFO_DATE.OPEN
+            trade.fifoCloseDateTime = trade.date
+            FIFO_DATE.OPEN = trade.date
+            trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*OPEN_PRICE))
             break;
         case TradeSide.CLOSE_EXPIRATION:
         case TradeSide.CLOSE_EXERCISE:
+            trade.fifoOpenDateTime = FIFO_DATE.OPEN
+            trade.fifoCloseDateTime = trade.date
+            
             trade.realizedPLEur = formatNumber(unclosedQty*OPEN_PRICE * -1)
             break;
     
@@ -169,7 +203,10 @@ export const runFifoUpdate = async () => {
             for (const t of symbolTrades) {
                 const prevTrades = getPreviousTrades(symbolTrades,tIndex);
                 const updated = updateFifoProps(t,prevTrades)
-                saveTrade(updated);
+
+                const cashSettlementUpdated = await updatePLwithCashSettlement(updated)
+                
+                saveTrade(cashSettlementUpdated);
                 tIndex+=1;
             }
         }

@@ -1,5 +1,6 @@
 import { app } from "electron";
 import Realm, { BSON, Configuration, RealmObjectConstructor } from "realm";
+import { OptionSettlement } from "./settlements";
 
 
 export class Trade extends Realm.Object {
@@ -22,6 +23,9 @@ export class Trade extends Realm.Object {
     netPriceEur:number;
     unclosed:number;
     openPriceEur: number;
+    fifoOpenDateTime:number;
+    fifoCloseDateTime:number;
+    optionCashSettlementEur:number;
     realizedPLEur:number;
 
    
@@ -48,6 +52,9 @@ export class Trade extends Realm.Object {
         netPriceEur:"double?",
         unclosed:"int?",
         openPriceEur:"double?",
+        fifoOpenDateTime:"int?",
+        fifoCloseDateTime:"int?",
+        optionCashSettlementEur:"double?",
         realizedPLEur:"double?"
       },
       primaryKey: "_id",
@@ -55,7 +62,8 @@ export class Trade extends Realm.Object {
   }
 
   const localConfig: Configuration = {
-    schema: [ Trade as RealmObjectConstructor<Trade> ],
+    schema: [ Trade as RealmObjectConstructor<Trade>, OptionSettlement as RealmObjectConstructor<OptionSettlement> ],
+
     path: `${app.getPath('userData')}/trades.realm`,
     deleteRealmIfMigrationNeeded:true
 };
