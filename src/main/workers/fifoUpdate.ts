@@ -121,6 +121,9 @@ const updatePLwithCashSettlement = async (trade:Trade): Promise<Trade> => {
 
 const FIFO_DATE = {OPEN:0,CLOSE:0}
 
+let FIFO_BALANCE = 0;
+let FIFO_PRICE = 0;
+
 const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
     const unclosedQty = previousTrades.map(t=>t.quantity).reduce((sum,q)=>sum+q,0);
     // OPEN_PRICE = unclosedQty == 0 ? trade.netProceedsEur / trade.quantity : OPEN_PRICE;
@@ -132,6 +135,8 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
         case TradeSide.OPEN_BUY:
         case TradeSide.OPEN_SELL:
             OPEN_PRICE = formatNumber(trade.netProceedsEur / trade.quantity, true)
+            FIFO_PRICE = formatNumber(trade.netProceedsEur / trade.quantity, true)
+            FIFO_BALANCE=formatNumber(trade.netProceedsEur)
             FIFO_DATE.OPEN = trade.date
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.realizedPLEur = 0;
@@ -139,30 +144,46 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
         case TradeSide.PARTIAL_OPEN_BUY:
         case TradeSide.PARTIAL_OPEN_SELL:
             OPEN_PRICE = getAverageOpenPrice(trade)
+            FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.realizedPLEur = 0;
             break;
         case TradeSide.PARTIAL_CLOSE_BUY:
+            trade.realizedPLEur = formatNumber(Math.abs(trade.quantity*FIFO_PRICE) + trade.netProceedsEur)
+            FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
+            break;
         case TradeSide.CLOSE_BUY:
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.fifoCloseDateTime = trade.date
             FIFO_DATE.OPEN = trade.date
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur + trade.quantity*OPEN_PRICE)
+            
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur + trade.quantity*OPEN_PRICE)
+            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            FIFO_BALANCE=0
+            FIFO_PRICE=0
             
             break;
         case TradeSide.PARTIAL_CLOSE_SELL:
+            trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*FIFO_PRICE))
+            FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
+            break;
         case TradeSide.CLOSE_SELL:
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.fifoCloseDateTime = trade.date
             FIFO_DATE.OPEN = trade.date
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*OPEN_PRICE))
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*OPEN_PRICE))
+            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            FIFO_BALANCE=0
+            FIFO_PRICE=0
             break;
         case TradeSide.CLOSE_EXPIRATION:
         case TradeSide.CLOSE_EXERCISE:
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.fifoCloseDateTime = trade.date
             
-            trade.realizedPLEur = formatNumber(unclosedQty*OPEN_PRICE * -1)
+            // trade.realizedPLEur = formatNumber(unclosedQty*OPEN_PRICE * -1)
+            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            FIFO_BALANCE=0
             break;
     
         default:
