@@ -101,8 +101,19 @@ export class TradesQueries{
                 () => {
                     const progress = {} as TradesSavingProgress
                     for (const trade of trades) {
-                    
-                    if(checkForDuplicate(trade)){
+                    const checkSameTime = ()=>{
+                        const filtered = trades.filter(t=>{return t.symbol == trade.symbol && t.date == trade.date})
+                        return filtered.length > 1
+                    }
+                    if(checkSameTime()){
+                        const toDelete = dbTrades.filtered("symbol == $0",trade.symbol).filtered("date == $0",trade.date)
+                        r.delete(toDelete)
+                        const filtered = trades.filter(t=>{return t.symbol == trade.symbol && t.date == trade.date})
+                        filtered.forEach(t=>{
+                            r.create("Trade",t,true);
+                        })
+                    }
+                    if(checkForDuplicate(trade) && !checkSameTime()){
                        const t =  r.create("Trade",trade,true);
                        progress.status = MainProcessStatus.FINISHED
                        progress.message = `Trade saved successfully`

@@ -1,6 +1,7 @@
 import { OptionSettlement } from "../storage/models/settlements";
 import { Trade, openTradeRealm } from "../storage/models/trades";
 import {Realm, UpdateMode} from "realm";
+import {FifoCalculator} from "./fifoPL"
 
 let R:Realm;
 
@@ -124,7 +125,7 @@ const FIFO_DATE = {OPEN:0,CLOSE:0}
 let FIFO_BALANCE = 0;
 let FIFO_PRICE = 0;
 
-const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
+const updateFifoProps = (trade:Trade,previousTrades:Trade[],calc:FifoCalculator):Trade => {
     const unclosedQty = previousTrades.map(t=>t.quantity).reduce((sum,q)=>sum+q,0);
     // OPEN_PRICE = unclosedQty == 0 ? trade.netProceedsEur / trade.quantity : OPEN_PRICE;
     const side = getTradeSide(trade,unclosedQty)
@@ -134,6 +135,7 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
     switch (side) {
         case TradeSide.OPEN_BUY:
         case TradeSide.OPEN_SELL:
+            calc.openTrade(trade)
             OPEN_PRICE = formatNumber(trade.netProceedsEur / trade.quantity, true)
             FIFO_PRICE = formatNumber(trade.netProceedsEur / trade.quantity, true)
             FIFO_BALANCE=formatNumber(trade.netProceedsEur)
@@ -143,13 +145,15 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
             break;
         case TradeSide.PARTIAL_OPEN_BUY:
         case TradeSide.PARTIAL_OPEN_SELL:
+            calc.openTrade(trade)
             OPEN_PRICE = getAverageOpenPrice(trade)
             FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             trade.fifoOpenDateTime = FIFO_DATE.OPEN
             trade.realizedPLEur = 0;
             break;
         case TradeSide.PARTIAL_CLOSE_BUY:
-            trade.realizedPLEur = formatNumber(Math.abs(trade.quantity*FIFO_PRICE) + trade.netProceedsEur)
+            // trade.realizedPLEur = formatNumber(Math.abs(trade.quantity*FIFO_PRICE) + trade.netProceedsEur)
+            trade.realizedPLEur = calc.closeGetPL(trade)
             FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             break;
         case TradeSide.CLOSE_BUY:
@@ -158,13 +162,15 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
             FIFO_DATE.OPEN = trade.date
             
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur + trade.quantity*OPEN_PRICE)
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            trade.realizedPLEur = calc.closeGetPL(trade)
             FIFO_BALANCE=0
             FIFO_PRICE=0
             
             break;
         case TradeSide.PARTIAL_CLOSE_SELL:
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*FIFO_PRICE))
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*FIFO_PRICE))
+            trade.realizedPLEur = calc.closeGetPL(trade)
             FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             break;
         case TradeSide.CLOSE_SELL:
@@ -172,7 +178,8 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
             trade.fifoCloseDateTime = trade.date
             FIFO_DATE.OPEN = trade.date
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*OPEN_PRICE))
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            trade.realizedPLEur = calc.closeGetPL(trade)
             FIFO_BALANCE=0
             FIFO_PRICE=0
             break;
@@ -182,7 +189,8 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[]):Trade => {
             trade.fifoCloseDateTime = trade.date
             
             // trade.realizedPLEur = formatNumber(unclosedQty*OPEN_PRICE * -1)
-            trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
+            trade.realizedPLEur = calc.closeGetPL(trade)
             FIFO_BALANCE=0
             break;
     
@@ -221,9 +229,10 @@ export const runFifoUpdate = async () => {
             
             const symbolTrades = getTradesBySymbolSorted(symbol);
             let tIndex = 0;
+            const calc = new FifoCalculator();
             for (const t of symbolTrades) {
                 const prevTrades = getPreviousTrades(symbolTrades,tIndex);
-                const updated = updateFifoProps(t,prevTrades)
+                const updated = updateFifoProps(t,prevTrades,calc)
 
                 const cashSettlementUpdated = await updatePLwithCashSettlement(updated)
                 
