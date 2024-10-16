@@ -80,6 +80,18 @@ export const SymbolFifoTable:FC<SymbolFifoTableProps> = (props:SymbolFifoTablePr
     const avgOpenPriceCellRenderer = (rowIndex: number) => (
         <Cell intent={getRowIntent(rowIndex)}>{isData() && props.data[rowIndex].openPriceEur}</Cell>
     );
+    const purchaseCostEurCellRenderer = (rowIndex: number) => (
+        <Cell intent={getRowIntent(rowIndex)}>{isData() && props.data[rowIndex].purchaseCostEur != 0 ? props.data[rowIndex].purchaseCostEur : ''}</Cell>
+
+    );
+    const optionCashSettlementEurCellRenderer = (rowIndex: number) => (
+        <Cell intent={getRowIntent(rowIndex)}>{isData() && props.data[rowIndex].optionCashSettlementEur!= 0 ? props.data[rowIndex].optionCashSettlementEur : ''}</Cell>
+
+    );
+    const revenuesEurCellRenderer = (rowIndex: number) => (
+        <Cell intent={getRowIntent(rowIndex)}>{isData() && props.data[rowIndex].revenuesEur!= 0 ? props.data[rowIndex].revenuesEur : ''}</Cell>
+
+    );
     const realizedPLEurCellRenderer = (rowIndex: number) => (
         <Cell intent={getRowIntent(rowIndex)}>{isData() && props.data[rowIndex].realizedPLEur != 0 ? props.data[rowIndex].realizedPLEur : ''}</Cell>
 
@@ -136,7 +148,11 @@ export const SymbolFifoTable:FC<SymbolFifoTableProps> = (props:SymbolFifoTablePr
                         <Column name="Commissions" cellRenderer={commissionsCellRenderer}/>
                         <Column name="EUR rate" cellRenderer={eurRateCellRenderer}/>
                         <Column name="Net Proceeds/EUR" cellRenderer={netProceedsCellRenderer}/>
-                        <Column name="Avg. open price/EUR" cellRenderer={avgOpenPriceCellRenderer}/>
+                        {/* <Column name="Avg. open price/EUR" cellRenderer={avgOpenPriceCellRenderer}/> */}
+
+                        <Column name="Purchase Cost, EUR" cellRenderer={purchaseCostEurCellRenderer}/>
+                        <Column name="Option Cash Settlement, EUR" cellRenderer={optionCashSettlementEurCellRenderer}/>
+                        <Column name="Revenues, EUR" cellRenderer={revenuesEurCellRenderer}/>
                         <Column name="Realized PL, EUR" cellRenderer={realizedPLEurCellRenderer}/>
                     
                        

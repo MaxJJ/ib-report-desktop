@@ -27,6 +27,8 @@ export class Trade extends Realm.Object {
     fifoCloseDateTime:number;
     optionCashSettlementEur:number;
     realizedPLEur:number;
+    purchaseCostEur:number;
+    revenuesEur:number;
 
    
 
@@ -55,7 +57,9 @@ export class Trade extends Realm.Object {
         fifoOpenDateTime:"int?",
         fifoCloseDateTime:"int?",
         optionCashSettlementEur:"double?",
-        realizedPLEur:"double?"
+        realizedPLEur:"double?",
+        purchaseCostEur:"double?",
+        revenuesEur:"double?",
       },
       primaryKey: "_id",
     };

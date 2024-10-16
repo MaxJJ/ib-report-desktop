@@ -33,7 +33,6 @@ export class MainAPI extends AppConfig{
     
     ipcMain.on(AppChannels.runXmlBuild,(event,data:DbTrade[],path:string,props:EdsReportProps)=>{
         const xml = new EdsReportBuilder(data,props).getXml()
-        console.log(xml)
         writeFileSync(path,xml,{encoding:'utf8',flag:'w'})
     })
   

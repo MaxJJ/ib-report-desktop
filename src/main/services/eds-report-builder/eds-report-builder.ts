@@ -1,7 +1,5 @@
 import { DbTrade, EdsReportProps } from "../../../shared/types";
 import {Builder, BuilderOptions} from "xml2js"
-// xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-
 
 type Record = {
     
@@ -20,7 +18,7 @@ type Record = {
 
 interface EdsSchema{
 
-    DokDKv5:{
+    DokDKv6:{
         $:any,
         Id:number,
         Precizejums:boolean,
@@ -32,7 +30,7 @@ interface EdsSchema{
         Talrunis:string,
         Epasts:string,
         Sagatavotajs:string,
-        Tab:{R:Record[]}
+        IenakumiIznemotVirtualasValutas:{Tabula:{R:Record[]}}
 
 
     }
@@ -40,7 +38,7 @@ interface EdsSchema{
 
 
 class EdsObj{
-    private xmlObj:EdsSchema = {DokDKv5:{
+    private xmlObj:EdsSchema = {DokDKv6:{
 
     }} as EdsSchema;
 
@@ -50,7 +48,7 @@ class EdsObj{
 
     constructor(data:DbTrade[],props:EdsReportProps){
         this.Data = data;
-        const root = this.xmlObj.DokDKv5
+        const root = this.xmlObj.DokDKv6
         root.$ = {
             "xmlns:xsd":"http://www.w3.org/2001/XMLSchema",
             "xmlns:xsi":"http://www.w3.org/2001/XMLSchema-instance"
@@ -63,14 +61,12 @@ class EdsObj{
         root.Epasts = props.email;
         root.Gads = props.year;
         root.Ceturksnis = props.quarter;
-        root.Tab ={R:[]}
+        root.IenakumiIznemotVirtualasValutas = {Tabula:{R:[]}}
         this.setRecords();
 
     }
 
     private setRecords(){
-        // this.xmlObj.DokDKv5.Tab = [] ;
-        
         this.Data.forEach((item,index)=>{
             const record:Record = {} as Record
 
@@ -79,20 +75,25 @@ class EdsObj{
             const dateStr = date.toISOString()
             record.IenDiena = dateStr
 
-            record.IenVeids="C"
+            if (item.assetType){
+                record.IenVeids= item.assetType && item.assetType.includes("Stock") ? "A" :"C"
+            }else{
+                record.IenVeids="C"
+            }
+            
 
             record.Rokasnauda = false;
-            record.IenKapAtsav = item.realizedPLEur
+            record.IenKapAtsav = item.revenuesEur ? parseFloat(item.revenuesEur.toFixed(2)) : 0
 
             record.f=false;
             record.l = false
             record.IenDala = 0
-            record.IzdKapIegade = 0
+            record.IzdKapIegade = item.purchaseCostEur ? parseFloat(item.purchaseCostEur.toFixed(2)) : 0
             record.AttiecDala = 0
             record.NodoklisArv = 0
 
                 
-            this.xmlObj.DokDKv5.Tab.R.push(record)
+            this.xmlObj.DokDKv6.IenakumiIznemotVirtualasValutas.Tabula.R.push(record)
         })
     }
 

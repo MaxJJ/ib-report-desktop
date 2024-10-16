@@ -56,7 +56,6 @@ export const parseXML = async (xml:string):Promise<CRates> => {
     let result:CRates = null;
     return new Promise((resolve,reject) => {
         parseString(xml,(err,res) => {
-            // console.log(JSON.stringify(res))
             result = res.CRates.Currencies;
             resolve(result)
             
@@ -90,23 +89,3 @@ export const getRate = async (currency: string,date: number)=> {
     return parseFloat(currencyRate[0].Rate[0])
   
 }
-
-// https://www.bank.lv/vk/ecb.xml?date=20050323 
-// (async () => {
-//     try {
-//       const res = await fetch('https://jsonplaceholder.typicode.com/users');
-//       const headerDate = res.headers && res.headers.get('date') ? res.headers.get('date') : 'no response date';
-//       console.log('Status Code:', res.status);
-//       console.log('Date in Response header:', headerDate);
-  
-//       const users = await res.json();
-
-//       res.text
-  
-//       for(user of users) {
-//         console.log(`Got user with id: ${user.id}, name: ${user.name}`);
-//       }
-//     } catch (err) {
-//       console.log(err.message); //can be console.error
-//     }
-//   })();

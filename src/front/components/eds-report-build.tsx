@@ -45,7 +45,6 @@ export const EdsReportBuild:FC<any> = () => {
             if(isFirst){
                 setAllData(s)
                 }
-            console.log(data)
         })
     }
 
@@ -65,7 +64,6 @@ export const EdsReportBuild:FC<any> = () => {
 
     const onAccountSelect = (item: string, event?: SyntheticEvent<HTMLElement, Event>) => {
 
-        console.log(item)
         setFilter({...filter,account:item})
 
 
@@ -123,8 +121,9 @@ export const EdsReportBuild:FC<any> = () => {
     }
 
     const runReportBuild = () => {
-        const withPositivePL = [...data].filter(t=>t.realizedPLEur > 0)
-        window.bridge.runXmlBuild(withPositivePL,file.path,reportProps)
+        // const withPositivePL = [...data].filter(t=>t.realizedPLEur > 0)
+        const withPL = [...data].filter(t=>t.realizedPLEur != 0)
+        window.bridge.runXmlBuild(withPL,file.path,reportProps)
     }
 
     const getQuarter = ():number => {

@@ -113,6 +113,7 @@ const updatePLwithCashSettlement = async (trade:Trade): Promise<Trade> => {
             const cashSettlement = ss.map(v=>v.amountEur).reduce((sum,curr)=>sum+curr , 0)
             trade.optionCashSettlementEur = cashSettlement
             trade.realizedPLEur = trade.realizedPLEur+cashSettlement
+            trade.purchaseCostEur = trade.purchaseCostEur+Math.abs(cashSettlement)
 
         }
     }
@@ -153,7 +154,13 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[],calc:FifoCalculator)
             break;
         case TradeSide.PARTIAL_CLOSE_BUY:
             // trade.realizedPLEur = formatNumber(Math.abs(trade.quantity*FIFO_PRICE) + trade.netProceedsEur)
-            trade.realizedPLEur = calc.closeGetPL(trade)
+            // trade.realizedPLEur = calc.closeGetPL(trade)
+            // eslint-disable-next-line no-case-declarations
+            const PCB = calc.closeGetPL(trade)
+            trade.realizedPLEur = PCB.PL
+            trade.purchaseCostEur = PCB.purchaseCost
+            trade.revenuesEur = PCB.revenuesEur
+
             FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             break;
         case TradeSide.CLOSE_BUY:
@@ -163,14 +170,26 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[],calc:FifoCalculator)
             
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur + trade.quantity*OPEN_PRICE)
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
-            trade.realizedPLEur = calc.closeGetPL(trade)
+            // trade.realizedPLEur = calc.closeGetPL(trade)
+
+            // eslint-disable-next-line no-case-declarations
+            const CB = calc.closeGetPL(trade)
+            trade.realizedPLEur = CB.PL
+            trade.purchaseCostEur = CB.purchaseCost
+            trade.revenuesEur = CB.revenuesEur
+
             FIFO_BALANCE=0
             FIFO_PRICE=0
             
             break;
         case TradeSide.PARTIAL_CLOSE_SELL:
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*FIFO_PRICE))
-            trade.realizedPLEur = calc.closeGetPL(trade)
+            // trade.realizedPLEur = calc.closeGetPL(trade)
+            // eslint-disable-next-line no-case-declarations
+            const PCS = calc.closeGetPL(trade)
+            trade.realizedPLEur = PCS.PL
+            trade.purchaseCostEur = PCS.purchaseCost
+            trade.revenuesEur = PCS.revenuesEur
             FIFO_BALANCE=formatNumber(FIFO_BALANCE + trade.netProceedsEur)
             break;
         case TradeSide.CLOSE_SELL:
@@ -179,7 +198,12 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[],calc:FifoCalculator)
             FIFO_DATE.OPEN = trade.date
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur - Math.abs(trade.quantity*OPEN_PRICE))
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
-            trade.realizedPLEur = calc.closeGetPL(trade)
+            // eslint-disable-next-line no-case-declarations
+            const CS = calc.closeGetPL(trade)
+            trade.realizedPLEur = CS.PL
+            trade.purchaseCostEur = CS.purchaseCost
+            trade.revenuesEur = CS.revenuesEur
+            
             FIFO_BALANCE=0
             FIFO_PRICE=0
             break;
@@ -190,7 +214,14 @@ const updateFifoProps = (trade:Trade,previousTrades:Trade[],calc:FifoCalculator)
             
             // trade.realizedPLEur = formatNumber(unclosedQty*OPEN_PRICE * -1)
             // trade.realizedPLEur = formatNumber(trade.netProceedsEur+FIFO_BALANCE)
-            trade.realizedPLEur = calc.closeGetPL(trade)
+            // trade.realizedPLEur = calc.closeGetPL(trade)
+
+            // eslint-disable-next-line no-case-declarations
+            const CEX = calc.closeGetPL(trade)
+            trade.realizedPLEur = CEX.PL
+            trade.purchaseCostEur = CEX.purchaseCost
+            trade.revenuesEur = CEX.revenuesEur
+
             FIFO_BALANCE=0
             break;
     

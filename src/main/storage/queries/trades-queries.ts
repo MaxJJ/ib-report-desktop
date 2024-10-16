@@ -72,7 +72,6 @@ export class TradesQueries{
         //////////////////////
         const settlementRecords = this.Data.optionsCashSettlement
 
-        console.log("Settlements Records: ",JSON.stringify(settlementRecords))
         const settlements = settlementRecords.dateTimeColumn ? await this.cashSettlementToModels(settlementRecords) : [];
         //////////////////////
 
